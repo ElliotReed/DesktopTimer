@@ -10,15 +10,15 @@ import java.net.URL;
 import java.util.prefs.Preferences;
 
 public class TimerApp {
-    private Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+    private final Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
     private Timer timer;
-    private JButton startPauseResumeButton;
-    private JButton stopButton;
-    private JFrame frame;
-    private JLabel timeLabel;
-    private JSpinner hoursSpinner;
-    private JSpinner minutesSpinner;
-    private JSpinner secondsSpinner;
+    private final JButton startPauseResumeButton;
+    private final JButton stopButton;
+    private final JFrame frame;
+    private final JLabel timeLabel;
+    private final JSpinner hoursSpinner;
+    private final JSpinner minutesSpinner;
+    private final JSpinner secondsSpinner;
     private boolean isPaused = false;
     private boolean isPlaying;
     private int remainingTime;
@@ -28,10 +28,11 @@ public class TimerApp {
         Color clrDark = Color.DARK_GRAY;
         Color clrLight = Color.LIGHT_GRAY;
         Color clrPrimary = Color.getHSBColor(0.12f,0.5f,0.75f);
-        Color clrSpinnerBorder = clrPrimary;
-        Color clrButtonDefault =Color.getHSBColor(0.2f,0.5f,0.5f);
-        Color clrButtonStart =Color.getHSBColor(0.3f,0.5f,0.5f);
-        Color clrButtonStop =Color.getHSBColor(0.0f,0.5f,0.5f);
+        Color clrButtonDefault = Color.getHSBColor(0.2f,0.5f,0.5f);
+        Color clrButtonStart = Color.getHSBColor(0.3f,0.5f,0.5f);
+        Color clrButtonStop = Color.getHSBColor(0.0f,0.5f,0.5f);
+        CustomColors customColors = new CustomColors();
+        Color clrSpinnerBorder =   customColors.createColors(clrPrimary);
 
         frame = new JFrame("Timer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
