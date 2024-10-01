@@ -9,7 +9,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.prefs.Preferences;
 
+
 public class TimerApp {
+    public enum TimerState {
+        PLAYING,
+        PAUSED,
+        FINISHED
+    }
+
+    private  TimerState state;
     private final Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
     private Timer timer;
     private final JButton startPauseResumeButton;
@@ -24,6 +32,7 @@ public class TimerApp {
     private int remainingTime;
 
     public TimerApp() {
+        this.state = null;
         Font baseFont = new Font("System", Font.PLAIN, 16);
         Color clrDark = Color.DARK_GRAY;
         Color clrLight = Color.LIGHT_GRAY;
@@ -184,25 +193,23 @@ public class TimerApp {
         });
 
         startPauseResumeButton.addActionListener((ActionEvent e) -> {
-            if (!isPlaying) {
-                int hours = (int) hoursSpinner.getValue();
-                int minutes = (int) minutesSpinner.getValue();
-                int seconds = (int) secondsSpinner.getValue();
+            if (state == null || state == TimerState.FINISHED) {
+               if(state == null) {
+                updateTimerFromSpinners();
+               }
 
-                remainingTime = hours * 3600 + minutes * 60 + seconds;
                 startTimer();
-                isPlaying = true;
+                state = TimerState.PLAYING;
                 startPauseResumeButton.setText("Pause");
                 stopButton.setEnabled(true);
             } else {
-                if (!isPaused) {
-                System.out.println("isPlaying not paused");
-                    startPauseResumeButton.setText("Resume");
+                if (state == TimerState.PLAYING) {
                     timer.stop();
-                    isPaused = true;
-                } else  {
+                    startPauseResumeButton.setText("Resume");
+                    state = TimerState.PAUSED;
+                } else if (state == TimerState.PAUSED) {
                     startTimer();
-                    isPaused = false;
+                    state = TimerState.PLAYING;
                     startPauseResumeButton.setText("Pause");
                 }
             }
@@ -245,12 +252,11 @@ public class TimerApp {
         });
 
         stopButton.addActionListener(e -> {
-                timer.stop();
-                isPlaying = false;
-                isPaused = false;
-                stopButton.setEnabled(false);
-                startPauseResumeButton.setText("Play");
-                updateTimerFromSpinners();
+            timer.stop();
+            state = null;
+            stopButton.setEnabled(false);
+            updateTimerFromSpinners();
+            startPauseResumeButton.setText("Start");
         });
 
         stopButton.addMouseListener(new MouseAdapter() {
@@ -284,9 +290,10 @@ public class TimerApp {
                 if (remainingTime == 0) {
                     stopButton.setEnabled(false);
                     timer.stop();
-                    isPlaying = false;
-                    startPauseResumeButton.setText("Play");
-                    playSound();  // Play the sound when the timer ends
+                    state = TimerState.FINISHED;
+                    playSound();
+                    startPauseResumeButton.setText("Start");
+                    updateTimerFromSpinners();
                 }
             } else {
                 timer.stop();
