@@ -1,7 +1,14 @@
 import java.awt.*;
 
-public class CustomColors {
-//    public final Color[] colors;
+public class CustomStyles {
+    public Font baseFont = new Font("System", Font.PLAIN, 16);
+    public Color clrDark = Color.DARK_GRAY;
+    public Color clrLight = Color.LIGHT_GRAY;
+    public Color clrPrimary = Color.getHSBColor(0.12f,0.5f,0.75f);
+    public Color clrButtonDefault = Color.getHSBColor(0.2f,0.5f,0.5f);
+    public Color clrButtonStart = Color.getHSBColor(0.3f,0.5f,0.5f);
+    public Color clrButtonStop = Color.getHSBColor(0.0f,0.5f,0.5f);
+
     public Color createColors(Color baseColor) {
     return baseColor;
     }

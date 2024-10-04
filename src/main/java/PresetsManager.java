@@ -1,11 +1,8 @@
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -15,7 +12,6 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 public class PresetsManager {
     public void savePresetsToFile(File xmlFile, String[][] presets) {
@@ -69,8 +65,8 @@ public class PresetsManager {
                 if (node.getNodeType() == Node.ELEMENT_NODE) {
                     Element element = (Element) node;
 
-                    String id = element.getAttribute("id");
-                    String time = element.getAttribute("time");
+                    String id = element.getElementsByTagName("id").item(0).getTextContent();
+                    String time = element.getElementsByTagName("time").item(0).getTextContent();
 
                     presets.add(new String[]{id, time});
                 }

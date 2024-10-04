@@ -2,13 +2,9 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.sound.sampled.*;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.io.IOException;
 import java.net.URL;
 import java.util.prefs.Preferences;
-
 
 public class TimerApp {
     public enum TimerState {
@@ -17,9 +13,10 @@ public class TimerApp {
         FINISHED
     }
 
-    private  TimerState state;
     private final Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
     private Timer timer;
+
+    private  TimerState state;
     private final JButton startPauseResumeButton;
     private final JButton stopButton;
     private final JFrame frame;
@@ -27,33 +24,24 @@ public class TimerApp {
     private final JSpinner hoursSpinner;
     private final JSpinner minutesSpinner;
     private final JSpinner secondsSpinner;
-    private boolean isPaused = false;
-    private boolean isPlaying;
     private int remainingTime;
 
     public TimerApp() {
         this.state = null;
-        Font baseFont = new Font("System", Font.PLAIN, 16);
-        Color clrDark = Color.DARK_GRAY;
-        Color clrLight = Color.LIGHT_GRAY;
-        Color clrPrimary = Color.getHSBColor(0.12f,0.5f,0.75f);
-        Color clrButtonDefault = Color.getHSBColor(0.2f,0.5f,0.5f);
-        Color clrButtonStart = Color.getHSBColor(0.3f,0.5f,0.5f);
-        Color clrButtonStop = Color.getHSBColor(0.0f,0.5f,0.5f);
-        CustomColors customColors = new CustomColors();
-        Color clrSpinnerBorder =   customColors.createColors(clrPrimary);
+        CustomStyles styles = new CustomStyles();
+        Color clrSpinnerBorder =   styles.createColors(styles.clrPrimary);
 
         frame = new JFrame("Timer");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(420, 630);
         int x = prefs.getInt("windowX", 100);
         int y = prefs.getInt("windowY", 100);
-        int width = prefs.getInt("width", 400);
+        int width = prefs.getInt("width", 800);
         int height = prefs.getInt("height", 600);
         frame.setLocation(x, y);
         frame.setSize(width, height);
         frame.setLayout(new GridBagLayout());
-        frame.getContentPane().setBackground(clrDark);
+        frame.getContentPane().setBackground(styles.clrDark);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(10, 10, 10, 10);
 
@@ -61,76 +49,64 @@ public class TimerApp {
 
         hoursSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 23, 1));
         hoursSpinner.setAlignmentX(Component.LEFT_ALIGNMENT);
-        hoursSpinner.setFont(baseFont.deriveFont(Font.BOLD, 18));
+        hoursSpinner.setFont(styles.baseFont.deriveFont(Font.BOLD, 18));
         hoursSpinner.setPreferredSize(spinnerButtonSize);
         hoursSpinner.setBorder(BorderFactory.createLineBorder(clrSpinnerBorder, 2));
         JComponent hoursComponent = (JComponent) hoursSpinner.getEditor().getComponent(0);
-        hoursComponent.setBackground(clrDark);
-        hoursComponent.setForeground(clrLight);
-//        hoursComponent.setBorder(BorderFactory.createCompoundBorder(
-//            hoursComponent.getBorder(),
-//            BorderFactory.createEmptyBorder(5, 15, 5, 15)
-//        ));
+        hoursComponent.setBackground(styles.clrDark);
+        hoursComponent.setForeground(styles.clrLight);
 
         minutesSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
         minutesSpinner.setAlignmentX(Component.LEFT_ALIGNMENT);
-        minutesSpinner.setFont(baseFont.deriveFont(Font.BOLD, 18));
+        minutesSpinner.setFont(styles.baseFont.deriveFont(Font.BOLD, 18));
         minutesSpinner.setPreferredSize(spinnerButtonSize);
         minutesSpinner.setBorder(BorderFactory.createLineBorder(clrSpinnerBorder, 2));
         JComponent minutesComponent = (JComponent) minutesSpinner.getEditor().getComponent(0);
-        minutesComponent.setBackground(clrDark);
+        minutesComponent.setBackground(styles.clrDark);
         minutesComponent.setForeground(Color.lightGray);
-//        minutesComponent.setBorder(BorderFactory.createCompoundBorder(
-//                minutesComponent.getBorder(),
-//                BorderFactory.createEmptyBorder(5, 15, 5, 15)
-//        ));
 
         secondsSpinner = new JSpinner(new SpinnerNumberModel(0, 0, 59, 1));
         secondsSpinner.setAlignmentX(Component.LEFT_ALIGNMENT);
         secondsSpinner.setBorder(BorderFactory.createLineBorder(clrSpinnerBorder, 2));
-        secondsSpinner.setFont(baseFont.deriveFont(Font.BOLD, 18));
+        secondsSpinner.setFont(styles.baseFont.deriveFont(Font.BOLD, 18));
         secondsSpinner.setPreferredSize(spinnerButtonSize);
         JComponent secondsComponent = (JComponent) secondsSpinner.getEditor().getComponent(0);
-        secondsComponent.setBackground(clrDark);
-        secondsComponent.setForeground(clrLight);
-//        secondsComponent.setBorder(BorderFactory.createCompoundBorder(
-//                secondsComponent.getBorder(),
-//                BorderFactory.createEmptyBorder(5, 15, 5, 15)
-//        ));
+        secondsComponent.setBackground(styles.clrDark);
+        secondsComponent.setForeground(styles.clrLight);
 
         JLabel hoursLabel = new JLabel("Hours:");
-        hoursLabel.setForeground(clrLight);
-        hoursLabel.setFont(baseFont);
+        hoursLabel.setForeground(styles.clrLight);
+        hoursLabel.setFont(styles.baseFont);
 
         JLabel minutesLabel = new JLabel("Minutes:");
-        minutesLabel.setForeground(clrLight);
-        minutesLabel.setFont(baseFont);
+        minutesLabel.setForeground(styles.clrLight);
+        minutesLabel.setFont(styles.baseFont);
 
         JLabel secondsLabel = new JLabel("Seconds:");
-        secondsLabel.setForeground(clrLight);
-        secondsLabel.setFont(baseFont);
+        secondsLabel.setForeground(styles.clrLight);
+        secondsLabel.setFont(styles.baseFont);
         secondsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         JPanel hoursPanel = new JPanel();
         hoursPanel.setLayout(new BoxLayout(hoursPanel,BoxLayout.Y_AXIS));
-        hoursPanel.setBackground(clrDark);
+        hoursPanel.setBackground(styles.clrDark);
         hoursPanel.add(hoursLabel);
         hoursPanel.add(hoursSpinner);
 
         JPanel minutesPanel = new JPanel();
         minutesPanel.setLayout(new BoxLayout(minutesPanel,BoxLayout.PAGE_AXIS));
-        minutesPanel.setBackground(clrDark);
+        minutesPanel.setBackground(styles.clrDark);
         minutesPanel.add(minutesLabel);
         minutesPanel.add(minutesSpinner);
 
         JPanel secondsPanel = new JPanel();
         secondsPanel.setLayout(new BoxLayout(secondsPanel,BoxLayout.Y_AXIS));
-        secondsPanel.setBackground(clrDark);
+        secondsPanel.setBackground(styles.clrDark);
         secondsPanel.add(secondsLabel);
         secondsPanel.add(secondsSpinner);
 
         JPanel timeSetPanel = new JPanel();
-        timeSetPanel.setBackground(clrDark);
+        timeSetPanel.setBackground(styles.clrDark);
 
         // Set GridBagConstraints for centering
         gbc.fill = GridBagConstraints.NONE; // No automatic stretching
@@ -154,8 +130,8 @@ public class TimerApp {
         frame.add(timeSetPanel, gbc);
 
         timeLabel = new JLabel("00:00:00", SwingConstants.CENTER);
-        timeLabel.setForeground(clrPrimary);
-        timeLabel.setFont(baseFont.deriveFont(Font.BOLD, 124));
+        timeLabel.setForeground(styles.clrPrimary);
+        timeLabel.setFont(styles.baseFont.deriveFont(Font.BOLD, 124));
         gbc.gridx = 0;
         gbc.gridy = 2;
         gbc.gridwidth = 3;
@@ -163,22 +139,27 @@ public class TimerApp {
         frame.add(timeLabel, gbc);
 
         startPauseResumeButton = new JButton("Start");
-        startPauseResumeButton.setBackground(clrButtonStart);
-        startPauseResumeButton.setForeground(clrLight);
-        startPauseResumeButton.setFont(baseFont.deriveFont(Font.BOLD, 16));
+        startPauseResumeButton.setBackground(styles.clrButtonStart);
+        startPauseResumeButton.setForeground(styles.clrLight);
+        startPauseResumeButton.setFont(styles.baseFont.deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 3;
-//        gbc.fill = GridBagConstraints.NONE;
         frame.add(startPauseResumeButton, gbc);
 
         stopButton = new JButton("Stop");
-        stopButton.setBackground(clrButtonStop);
-        stopButton.setForeground(clrLight);
-        stopButton.setFont(baseFont.deriveFont(Font.BOLD, 16));
+        stopButton.setBackground(styles.clrButtonStop);
+        stopButton.setForeground(styles.clrLight);
+        stopButton.setFont(styles.baseFont.deriveFont(Font.BOLD, 16));
         gbc.gridx = 0;
         gbc.gridy = 4;
         frame.add(stopButton, gbc);
         stopButton.setEnabled(false);
+
+        PresetsPanel presetsPanel = new PresetsPanel(styles.clrDark, styles.clrLight, styles.baseFont);
+        gbc.gridx = 5;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        frame.add(presetsPanel, gbc);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -219,37 +200,22 @@ public class TimerApp {
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
-                startPauseResumeButton.setBackground(clrButtonDefault);
+                startPauseResumeButton.setBackground(styles.clrButtonDefault);
                 startPauseResumeButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
-                startPauseResumeButton.setBackground(clrButtonStart);
+                startPauseResumeButton.setBackground(styles.clrButtonStart);
             }
         });
 
-        hoursSpinner.addChangeListener(new ChangeListener() {
-           @Override
-           public void stateChanged(ChangeEvent e) {
-               updateTimerFromSpinners();
-           }
-       });
+        hoursSpinner.addChangeListener(e -> updateTimerFromSpinners());
 
-        minutesSpinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                updateTimerFromSpinners();
-            }
-        });
+        minutesSpinner.addChangeListener(e -> updateTimerFromSpinners());
 
-        secondsSpinner.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                updateTimerFromSpinners();
-            }
-        });
+        secondsSpinner.addChangeListener(e -> updateTimerFromSpinners());
 
         stopButton.addActionListener(e -> {
             timer.stop();
@@ -263,21 +229,21 @@ public class TimerApp {
             @Override
             public void mouseEntered(MouseEvent e) {
                 super.mouseEntered(e);
-                stopButton.setBackground(clrButtonDefault);
+                stopButton.setBackground(styles.clrButtonDefault);
                 stopButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
                 super.mouseExited(e);
-                stopButton.setBackground(clrButtonStop);
+                stopButton.setBackground(styles.clrButtonStop);
             }
         });
 
         frame.setVisible(true);
     }
 
-    private Timer setUpTimer() {
+        private Timer setUpTimer() {
         if (timer != null) {
             timer.stop();
         }
@@ -316,10 +282,8 @@ public class TimerApp {
     }
 
     private void updateTimeLabel() {
-        int hours = remainingTime / 3600;
-        int minutes =( remainingTime % 3600) / 60;
-        int seconds = remainingTime % 60;
-        timeLabel.setText(String.format("%02d:%02d:%02d",hours, minutes, seconds));
+        ClockTime time = TimeConverter.getHourMinutesSecondsFromSeconds(remainingTime);
+        timeLabel.setText(TimeConverter.getTimeString(time.hours, time.minutes, time.seconds));
     }
 
     private void playSound() {
