@@ -7,6 +7,10 @@ public class TimeConverter {
         return new ClockTime(hours, minutes, seconds);
     }
 
+    public static int getTotalSecondsFromHoursMinutesSeconds(int hours, int minutes, int seconds) {
+        return hours * 3600 + minutes * 60 + seconds;
+    }
+
     public static String getTimeString(int hours, int minutes, int seconds) {
         return  String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }

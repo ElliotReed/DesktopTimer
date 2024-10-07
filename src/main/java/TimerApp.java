@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.prefs.Preferences;
 
-public class TimerApp {
+public class TimerApp implements PresetsPanel.PresetActionListener {
     public enum TimerState {
         PLAYING,
         PAUSED,
@@ -28,6 +28,7 @@ public class TimerApp {
 
     public TimerApp() {
         this.state = null;
+
         CustomStyles styles = new CustomStyles();
         Color clrSpinnerBorder =   styles.createColors(styles.clrPrimary);
 
@@ -155,7 +156,7 @@ public class TimerApp {
         frame.add(stopButton, gbc);
         stopButton.setEnabled(false);
 
-        PresetsPanel presetsPanel = new PresetsPanel(styles.clrDark, styles.clrLight, styles.baseFont);
+        PresetsPanel presetsPanel = new PresetsPanel(this);
         gbc.gridx = 5;
         gbc.gridy = 0;
         gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -243,7 +244,7 @@ public class TimerApp {
         frame.setVisible(true);
     }
 
-        private Timer setUpTimer() {
+    private Timer setUpTimer() {
         if (timer != null) {
             timer.stop();
         }
@@ -277,7 +278,7 @@ public class TimerApp {
         int minutes = (int) minutesSpinner.getValue();
         int seconds = (int) secondsSpinner.getValue();
 
-        remainingTime = hours * 3600 + minutes * 60 + seconds;
+        remainingTime = TimeConverter.getTotalSecondsFromHoursMinutesSeconds(hours,minutes,seconds);
             updateTimeLabel();
     }
 
@@ -304,6 +305,14 @@ public class TimerApp {
         } catch (UnsupportedAudioFileException | IOException | LineUnavailableException e) {
             e.printStackTrace();
         }
+    }
+
+    @Override
+    public void presetAction(int seconds) {
+        remainingTime = seconds;
+        updateTimeLabel();
+        secondsSpinner.setValue(10);
+        System.out.println("called with " + seconds + " seconds");
     }
 
     public static void main(String[] args) {
