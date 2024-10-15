@@ -82,9 +82,11 @@ public class PresetsManager {
         PresetsManager manager = new PresetsManager();
 
         String[][] presets = {
-                {"1", "600000"},
-                {"2", "120000"},
-                {"3", "3000"}
+                {"1", "300"},
+                {"2", "900"},
+                {"5", "1800"},
+                {"3", "3600"},
+                {"4", "5400"}
         };
 
         File file = new File("presets.xml");
