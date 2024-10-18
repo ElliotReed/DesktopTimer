@@ -7,81 +7,56 @@ public class SetTimePanel extends JPanel {
     private final JSpinner hoursSpinner;
     private final JSpinner minutesSpinner;
     private final JSpinner secondsSpinner;
+    private PresetsPanel presetsPanel;
+    private CustomStyles styles;
 
     public SetTimePanel(TimerApp timerApp) {
         this.timerApp = timerApp;
+        styles = new CustomStyles();
+
         PresetsManager presetsManager = new PresetsManager();
-        CustomStyles styles = new CustomStyles();
         Color clrSpinnerBorder =   styles.createColors(styles.clrPrimary);
-        GridBagConstraints gbc = new GridBagConstraints();
         Dimension spinnerButtonSize = new Dimension(60, 50);
 
         this.setBackground(styles.clrDark);
 
         JPanel spinnerPanel = new JPanel();
-        spinnerPanel.setLayout(new GridBagLayout());
         spinnerPanel.setBackground(styles.clrDark);
 
-        hoursSpinner = new Spinner(new SpinnerNumberModel(0, 0, 23, 1));
-        minutesSpinner = new Spinner(new SpinnerNumberModel(0, 0, 59, 1));
-        secondsSpinner = new Spinner(new SpinnerNumberModel(0, 0, 59, 1));
-
-        JLabel hoursLabel = new JLabel("Hours:");
-        hoursLabel.setForeground(styles.clrLight);
-        hoursLabel.setFont(styles.baseFont);
-
-        JLabel minutesLabel = new JLabel("Minutes:");
-        minutesLabel.setForeground(styles.clrLight);
-        minutesLabel.setFont(styles.baseFont);
-
-        JLabel secondsLabel = new JLabel("Seconds:");
-        secondsLabel.setForeground(styles.clrLight);
-        secondsLabel.setFont(styles.baseFont);
-        secondsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-
         JPanel hoursPanel = new JPanel();
-        hoursPanel.setLayout(new BoxLayout(hoursPanel,BoxLayout.Y_AXIS));
-        hoursPanel.setBackground(styles.clrDark);
+        JLabel hoursLabel = new JLabel("Hours:");
+        styleSpinner(hoursPanel, hoursLabel);
+        hoursSpinner = new Spinner(new SpinnerNumberModel(0, 0, 23, 1));
         hoursPanel.add(hoursLabel);
         hoursPanel.add(hoursSpinner);
 
         JPanel minutesPanel = new JPanel();
-        minutesPanel.setLayout(new BoxLayout(minutesPanel,BoxLayout.PAGE_AXIS));
-        minutesPanel.setBackground(styles.clrDark);
+        JLabel minutesLabel = new JLabel("Minutes:");
+        styleSpinner(minutesPanel, minutesLabel);
+        minutesSpinner = new Spinner(new SpinnerNumberModel(0, 0, 59, 1));
         minutesPanel.add(minutesLabel);
         minutesPanel.add(minutesSpinner);
 
         JPanel secondsPanel = new JPanel();
-        secondsPanel.setLayout(new BoxLayout(secondsPanel,BoxLayout.Y_AXIS));
-        secondsPanel.setBackground(styles.clrDark);
+        JLabel secondsLabel = new JLabel("Seconds:");
+        styleSpinner(secondsPanel, secondsLabel);
+        secondsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        secondsSpinner = new Spinner(new SpinnerNumberModel(0, 0, 59, 1));
         secondsPanel.add(secondsLabel);
         secondsPanel.add(secondsSpinner);
 
-        // Set GridBagConstraints for centering
-        gbc.fill = GridBagConstraints.NONE; // No automatic stretching
-        gbc.anchor = GridBagConstraints.CENTER; // Center components in grid cells
-        gbc.weightx = 0; // Don't expand components horizontally
-        gbc.weighty = 0;
-
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 1;
-        spinnerPanel.add(hoursPanel, gbc);
-
-        gbc.gridx = 1;
-        spinnerPanel.add(minutesPanel, gbc);
-
-        gbc.gridx = 2;
-        spinnerPanel.add(secondsPanel, gbc);
+        spinnerPanel.add(hoursPanel);
+        spinnerPanel.add(minutesPanel);
+        spinnerPanel.add(secondsPanel);
 
         JButton savePresetButton = new JButton("Save as Preset");
-        gbc.gridx = 3;
-        spinnerPanel.add(savePresetButton, gbc);
+
+        spinnerPanel.add(Box.createHorizontalStrut(25));
+        spinnerPanel.add(savePresetButton);
 
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.add(spinnerPanel);
-        File xmlFile = new File("presets.xml");
-        PresetsPanel presetsPanel = new PresetsPanel(this);
+        presetsPanel = new PresetsPanel(this);
         this.add(presetsPanel);
 
         hoursSpinner.addChangeListener(e -> onSetTimeChange());
@@ -91,7 +66,16 @@ public class SetTimePanel extends JPanel {
         secondsSpinner.addChangeListener(e -> onSetTimeChange());
 
         savePresetButton.addActionListener(e -> {
+            presetsPanel.addPreset(getSetTime());
         });
+    }
+
+    private void styleSpinner(JPanel panel, JLabel label) {
+        panel.setLayout(new BoxLayout(panel,BoxLayout.Y_AXIS));
+        panel.setBackground(styles.clrDark);
+
+        label.setForeground(styles.clrLight);
+        label.setFont(styles.baseFont);
     }
 
     private void onSetTimeChange() {

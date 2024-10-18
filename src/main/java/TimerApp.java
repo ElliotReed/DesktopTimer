@@ -4,6 +4,7 @@ import java.awt.event.*;
 import javax.sound.sampled.*;
 import java.io.IOException;
 import java.net.URL;
+import java.util.Objects;
 import java.util.prefs.Preferences;
 
 public class TimerApp {
@@ -29,53 +30,58 @@ public class TimerApp {
         this.state = null;
         CustomStyles styles = new CustomStyles();
 
-        frame = new JFrame("Timer");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(420, 630);
         int x = preferences.getInt("windowX", 100);
         int y = preferences.getInt("windowY", 100);
         int width = preferences.getInt("width", 800);
         int height = preferences.getInt("height", 600);
+
+        ImageIcon icon = new ImageIcon(Objects.requireNonNull(getClass().getResource("/appIcon.png")));
+
+        frame = new JFrame("Timer");
+        frame.setIconImage(icon.getImage());
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLocation(x, y);
         frame.setSize(width, height);
-        frame.setLayout(new GridBagLayout());
+        frame.setLayout(new BorderLayout());
         frame.getContentPane().setBackground(styles.clrDark);
-        GridBagConstraints gbc = new GridBagConstraints();
 
-        gbc.insets = new Insets(10, 10, 10, 10);
+        frame.add(Box.createHorizontalStrut(25), BorderLayout.WEST);
+        frame.add(Box.createHorizontalStrut(25), BorderLayout.EAST);
 
-        timeLabel = new JLabel("00:00:00", SwingConstants.CENTER);
+     ;   timeLabel = new JLabel("00:00:00", SwingConstants.CENTER);
         timeLabel.setForeground(styles.clrPrimary);
-        timeLabel.setFont(styles.baseFont.deriveFont(Font.BOLD, 200));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        frame.add(timeLabel, gbc);
+        timeLabel.setFont(styles.baseFont.deriveFont(Font.BOLD, 0));
+        frame.add(timeLabel, BorderLayout.CENTER);
+        resizeFont(timeLabel);
+
+        JPanel lowerPanel = new JPanel();
+        lowerPanel.setLayout(new BoxLayout(lowerPanel, BoxLayout.Y_AXIS));
+        lowerPanel.setBackground(styles.clrDark);
+
+        JPanel controls = new JPanel();
+        controls.setLayout(new BoxLayout(controls, BoxLayout.X_AXIS));
+        controls.setBackground(styles.clrDark);
 
         startPauseResumeButton = new JButton("Start");
         startPauseResumeButton.setBackground(styles.clrButtonStart);
         startPauseResumeButton.setForeground(styles.clrLight);
         startPauseResumeButton.setFont(styles.baseFont.deriveFont(Font.BOLD, 16));
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        frame.add(startPauseResumeButton, gbc);
+        controls.add(startPauseResumeButton);
 
         stopButton = new JButton("Stop");
         stopButton.setBackground(styles.clrButtonStop);
         stopButton.setForeground(styles.clrLight);
         stopButton.setFont(styles.baseFont.deriveFont(Font.BOLD, 16));
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        frame.add(stopButton, gbc);
         stopButton.setEnabled(false);
+        controls.add(stopButton);
 
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 3;
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        lowerPanel.add(controls);
+
         setTimePanel = new SetTimePanel(this);
-        frame.add(setTimePanel, gbc);
+        lowerPanel.add(Box.createVerticalStrut(10));
+        lowerPanel.add(setTimePanel);
+
+        frame.add(lowerPanel, BorderLayout.SOUTH);
 
         frame.addWindowListener(new WindowAdapter() {
             @Override
@@ -86,6 +92,13 @@ public class TimerApp {
                 preferences.putInt("width", frame.getWidth());
                 preferences.putInt("height", frame.getHeight());
                 System.exit(0);
+            }
+        });
+
+        timeLabel.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                resizeFont(timeLabel);
             }
         });
 
@@ -188,6 +201,21 @@ public class TimerApp {
     private void updateTimeLabel() {
         ClockTime clockTime = TimeConverter.getHourMinutesSecondsFromSeconds(remainingTime);
         timeLabel.setText(TimeConverter.getTimeString(clockTime.hours, clockTime.minutes, clockTime.seconds));
+    }
+
+    private void resizeFont(JLabel label) {
+        Font labelFont = label.getFont();
+        String labelText = label.getText();
+
+        int labelWidth = label.getWidth();
+        int labelHeight = label.getHeight();
+
+        if (labelWidth <= 0 || labelHeight <= 0) {
+            return;
+        }
+
+        int newFontSize = Math.min((labelWidth / labelText.length()) * 2, labelHeight) - 1;
+        label.setFont(new Font(labelFont.getName(), Font.BOLD, newFontSize));
     }
 
     private void playSound() {

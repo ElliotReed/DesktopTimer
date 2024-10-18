@@ -14,7 +14,49 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class PresetsManager {
-    public void savePresetsToFile(File xmlFile, String[][] presets) {
+
+    private static final String PRESETS_DIRECTORY = System.getProperty("user.home")
+            + File.separator
+            + "AppData"
+            + File.separator
+            + "Local"
+            + File.separator
+            + ".desktopTimer";
+    private static final  String PRESETS_FILE = PRESETS_DIRECTORY + File.separator + "presets.xml";
+
+//    macOS: Use System.getProperty("user.home") + "/Library/Application Support/YourAppName".
+//    Linux: Use System.getProperty("user.home") + "/.config/YourAppName".
+
+    public static String getAppDataPath() {
+        String os = System.getProperty("os.name").toLowerCase();
+        String appDataPath;
+        String userHome = System.getProperty("user.home");
+
+        if (os.contains("win")) {
+            // Windows path (AppData)
+            appDataPath = userHome + File.separator + "AppData" + File.separator + "Local" + File.separator + "YourAppName";
+        } else if (os.contains("mac")) {
+            // macOS path (~/.yourAppName)
+            appDataPath = userHome + File.separator + "Library" + File.separator + "Application Support" + File.separator + "YourAppName";
+        } else {
+            // Linux/Unix path (~/.yourAppName)
+            appDataPath = userHome + File.separator + ".YourAppName";
+        }
+
+        return appDataPath;
+    }
+
+    public PresetsManager() {
+        File directory = new File(PRESETS_DIRECTORY);
+
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    }
+
+    public void savePresetsToFile(String[][] presets) {
+        File file = new File(PRESETS_FILE);
+
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
@@ -41,7 +83,7 @@ public class PresetsManager {
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource domSource = new DOMSource(document);
-            StreamResult streamResult = new StreamResult(xmlFile);
+            StreamResult streamResult = new StreamResult(file);
 
             transformer.transform(domSource, streamResult);
         } catch (Exception e) {
@@ -49,12 +91,13 @@ public class PresetsManager {
         }
     }
 
-    public List<String[]> loadPresetsFromFile(File xmlFile) {
+    public List<String[]> loadPresetsFromFile() {
         List<String[]> presets = new ArrayList<>();
+        File file = new File(PRESETS_FILE);
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            Document document = builder.parse(xmlFile);
+            Document document = builder.parse(file);
 
             document.getDocumentElement().normalize();
 
@@ -78,28 +121,49 @@ public class PresetsManager {
         return presets;
     }
 
-    public static void main(String[] args) {
-        PresetsManager manager = new PresetsManager();
+    public String getNextPresetId() {
+        List<String[]> loadedPresets = loadPresetsFromFile();
+        int maxId = 0;
 
-        String[][] presets = {
-                {"1", "300"},
-                {"2", "900"},
-                {"5", "1800"},
-                {"3", "3600"},
-                {"4", "5400"}
-        };
-
-        File file = new File("presets.xml");
-        manager.savePresetsToFile(file, presets);
-
-        System.out.println("Presets saved to " + file.getAbsolutePath());
-
-        File xmlFile = new File("presets.xml");
-        List<String[]> loadedPresets = manager.loadPresetsFromFile(xmlFile);
-
-        System.out.println("Loaded presets");
-        for (String[] preset : presets) {
-            System.out.println("ID: " + preset[0] + ", Time: " + preset[1]);
+        for (String[] preset : loadedPresets) {
+            try {
+                int currentId = Integer.parseInt(preset[0]);
+                if (currentId > maxId) {
+                    maxId = currentId;
+                }
+            } catch (NumberFormatException e) {
+                System.err.println("Non-numeric preset ID found: " + preset[0]);
+            }
         }
+
+        return String.valueOf(maxId + 1);
+    }
+
+
+
+    public static void main(String[] args) {
+        System.out.println(PRESETS_DIRECTORY);
+//        PresetsManager manager = new PresetsManager();
+//
+//        String[][] presets = {
+//                {"1", "300"},
+//                {"2", "900"},
+//                {"5", "1800"},
+//                {"3", "3600"},
+//                {"4", "5400"}
+//        };
+//
+//        File file = new File("presets.xml");
+//        manager.savePresetsToFile(file, presets);
+//
+//        System.out.println("Presets saved to " + file.getAbsolutePath());
+//
+//        File xmlFile = new File("presets.xml");
+//        List<String[]> loadedPresets = manager.loadPresetsFromFile(xmlFile);
+//
+//        System.out.println("Loaded presets");
+//        for (String[] preset : presets) {
+//            System.out.println("ID: " + preset[0] + ", Time: " + preset[1]);
+//        }
     }
 }

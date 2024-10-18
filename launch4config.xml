@@ -3,7 +3,7 @@
   <dontWrapJar>false</dontWrapJar>
   <headerType>gui</headerType>
   <jar>B:\projects\timers\DesktopTimer\target\DesktopTimer-1.0.jar</jar>
-  <outfile>C:\Users\ellio\Desktop\VTimer.exe</outfile>
+  <outfile>C:\Users\ellio\Desktop\DesktopTimer.exe</outfile>
   <errTitle></errTitle>
   <cmdLine></cmdLine>
   <chdir>.</chdir>
@@ -13,7 +13,7 @@
   <stayAlive>false</stayAlive>
   <restartOnCrash>false</restartOnCrash>
   <manifest></manifest>
-  <icon></icon>
+  <icon>B:\projects\timers\DesktopTimer\src\main\resources\appIcon.ico</icon>
   <classPath>
     <mainClass>TimerApp</mainClass>
   </classPath>
